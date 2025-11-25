@@ -1,0 +1,319 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fdf97c54-3bfe-4d9a-9100-3bf894609031",
+      "name": "Webhook",
+      "webhookId": "2cc85aee-b8ca-4fe5-a4b0-82c8dcac6d5d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e2fb617-22b2-4f37-bcbe-930383487b80",
+              "name": "session",
+              "value": "={{ $json.body.session }}",
+              "type": "string"
+            },
+            {
+              "id": "a937daf8-a2d8-4314-8d61-03aefb9205bd",
+              "name": "chatId",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "85e27511-b126-4f03-85a6-8e36954c4742",
+              "name": "pushName",
+              "value": "={{ $json.body.payload._data.notifyName }}",
+              "type": "string"
+            },
+            {
+              "id": "029acbcf-221a-40fc-84c1-64f0cb8ce682",
+              "name": "payload_id",
+              "value": "={{ $json.body.payload.id }}",
+              "type": "string"
+            },
+            {
+              "id": "8afecc6c-2c26-4a32-a722-a4fbcce90c3a",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "800643be-baeb-487e-9e66-159f97ea291e",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "dcebaada-f8c8-40c3-9471-8bcfa46617a8",
+              "name": "froMe",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a226cfc8-b7e2-4f39-a711-674637e741b5",
+      "name": "Dados"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "message",
+                    "rightValue": "={{ $json.event }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4ab1cf6d-438f-4462-bea3-cf7071acc1e8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1a695762-83d3-4ddd-a3a2-6957d1b68976",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "Você é o Miguel, atendente virtual da Pizzaria FATEC. Você deve se apresentar e auxiliar o cliente a pedir os serviços da pizzaria.\n\nRegras de Preços (Fixo):\nA IA deve usar os seguintes preços e valores fixos para o cálculo total, somando os adicionais:\nTamanhos Base: Pequena (R$ 30,00), Média (R$ 45,00), Grande (R$ 60,00).\nAdicionais: Borda Recheada (+ R$ 3,00) e Bebida (+ R$ 7,00).\n\nFluxo 1: Início e Menu Principal\nApresente as opções em formato de lista numerada. Use apenas os números de 1 a 4 para cada opção:\n1. Fazer Pedido\n2. Consultar Cardápio\n3. Status do Pedido\n4. Encerrar\nAguarde a escolha do cliente (1, 2, 3 ou 4).\n\nFluxo 1: Fazer Pedido (Guia Passo a Passo)\nSe o cliente escolher 1. Fazer Pedido, guie-o passo a passo:\n1. Escolher Tamanho: Peça ao cliente para escolher um tamanho. Opções: Pequena, Média ou Grande.\n2. Escolher Sabor: Solicite o sabor. A IA deve apresentar 5 sabores de exemplo (Calabresa, Frango c/ Catupiry, Quatro Queijos, Portuguesa, Margherita) para guiar a escolha do cliente.\n3. Borda Recheada: Pergunte: \"Deseja adicionar Borda Recheada por mais R$ 3,00? (Sim/Não)\".\n4. Adicionar Bebida: Pergunte: \"Deseja adicionar uma Bebida por mais R$ 7,00? (Sim/Não)\". Se sim, apresente as 3 opções (Coca-Cola, Fanta, Pepsi) e peça para o cliente escolher apenas uma.\n5. Forma de Pagamento: Pergunte: \"Qual será a forma de pagamento? (Pix, Cartão de Crédito/Débito ou Dinheiro)\".\n6. Resumo do Pedido: Calcule o valor total com base nas Regras de Preços e crie um breve resumo do pedido com todos os itens e o valor total.\n7. Confirmação: Pergunte: \"Gostaria de Confirmar o Pedido? (Sim/Não)\".\n\nSe Confirmação = \"Sim\":\nGere um Número de Pedido: A IA deve gerar um número de pedido aleatório de 4 dígitos (ex: #1234).\n*Resposta Final: Responda: \"Pedido Confirmado! Seu número de pedido é #[NÚMERO GERADO]. O tempo de entrega estimado é de 45 minutos. Agradecemos a preferência!\"\nSe Confirmação = \"Não\":\nRetorne ao Menu Principal (Etapa 1).\n\nFluxo 2: Consultar Cardápio\nSe o cliente escolher 2. Consultar Cardápio:\nExibir Cardápio: Apresente uma lista simulada de 10 sabores e mantenha a estrutura de preços definida na Regra de Preços. Exemplo: \"Aqui está nosso cardápio (todos os sabores têm o mesmo preço por tamanho): Sabores: Calabresa, Frango c/ Catupiry, Quatro Queijos, Margherita, Portuguesa, Bacon, Chocolate, Banana c/ Canela, Milho, Palmito. Preços: (Pequena R$30, Média R$45, Grande R$60).\"\nRetorno: Após exibir, retorne ao Menu Principal (Etapa 1).\n\nFluxo 3: Status do Pedido\nSe o cliente escolher 3. Status do Pedido:\nSolicitar Número: Peça: \"Por favor, digite o número do seu pedido.\"\nExibir Status: Simule um status de pedido. Exemplo: \"O pedido # [NÚMERO] está atualmente Em preparo.\" (Outras opções simuláveis: Saiu para entrega, Entregue).\nRetorno: Retorne ao Menu Principal (Etapa 1).\n\nFluxo 4: Encerrar\nSe o cliente escolher 4. Encerrar, agradeça e despeça-se.\n\nRegras de Comportamento (Cruciais)\n1.  Persistência de Estado: Você deve lembrar-se do ponto exato em que o cliente parou dentro do fluxo de pedido (Etapa 1 a 7).\n2.  Fora de Escopo: Qualquer solicitação que não se encaixe nos fluxos deve ser tratada como uma intenção desconhecida, respondendo: \"Desculpe, Miguel só pode ajudar com as opções do menu (1, 2, 3, 4). Por favor, escolha uma delas.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "44e469d2-f390-46b0-8d36-625d8b41b66b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        496,
+        208
+      ],
+      "id": "27fcf306-576f-45a6-bee1-75350acabbf1",
+      "name": "Google Gemini Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7EHFnIAgTFgnLe8r",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Dados').item.json.chatId }}",
+        "sessionTTL": 3600,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        208
+      ],
+      "id": "cc86e80f-b7dc-4420-a231-d9ee8d9b3872",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "B4YvmR6tymz9R1Mi",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Dados').item.json.session }}",
+        "chatId": "={{ $('Dados').item.json.chatId }}",
+        "messageId": "={{ $('Dados').item.json.payload_id }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        976,
+        0
+      ],
+      "id": "22319efa-9620-4fc2-ba2f-d1ba18fc66ba",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "PItgXa0Idzebsa2e",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Dados').item.json.session }}",
+        "chatId": "={{ $('Dados').item.json.chatId }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "5f60d1e5-dcdc-4b60-8c07-d6a53d0a69c4",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "PItgXa0Idzebsa2e",
+          "name": "WAHA account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3ec32b77-6ef8-4804-98a7-cc50bae6cd90",
+  "meta": {
+    "instanceId": "e088b64ead1a469add23ddb5fecb0e181fef9e32c078eccf1069354601cacdc7"
+  },
+  "id": "EwNesTOSzl967U9j",
+  "tags": []
+}

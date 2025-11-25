@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:latest
+    # Usa a senha definida no arquivo .env
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - waha-net
+    volumes:
+      - redis_data:/data
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      # URL interna para comunicação entre containers (opcional, mas bom manter)
+      - N8N_WEBHOOK_URL=http://localhost:5678
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      # MUDANÇA: 'info' limpa aqueles logs repetitivos de "Querying database"
+      - N8N_LOG_LEVEL=info
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - waha-net
+
+  waha:
+    image: devlikeapro/waha:latest
+    restart: always
+    # shm_size ajuda a evitar travamentos do Chrome
+    shm_size: "2gb"
+    environment:
+      # Puxa senhas seguras do .env
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_ENGINE=chromium
+      # Nota: Esta URL aponta para o workflow ATIVO (Produção)
+      - WAHA_WEBHOOK_URL=http://n8n:5678/webhook/webhook
+      - WAHA_DASHBOARD_USERNAME=${WAHA_USER}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_PASSWORD}
+      - WAHA_SWAGGER_USERNAME=${WAHA_USER}
+      - WAHA_SWAGGER_PASSWORD=${WAHA_PASSWORD}
+      - WAHA_PRINT_QR=true
+      - WAHA_LOG_LEVEL=info
+      # Conecta no Redis usando a senha do .env
+      - WAHA_REDIS_URI=redis://:${REDIS_PASSWORD}@redis:6379
+    depends_on:
+      - n8n
+      - redis
+    ports:
+      - "3000:3000"
+    volumes:
+      - waha_sessions:/app/.sessions
+      - waha_media:/app/.media
+    networks:
+      - waha-net
+
+networks:
+  waha-net:
+    driver: bridge
+
+volumes:
+  redis_data:
+  n8n_data:
+  waha_sessions:
+  waha_media:

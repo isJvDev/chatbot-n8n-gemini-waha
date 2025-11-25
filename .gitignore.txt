@@ -1,0 +1,15 @@
+# --- Arquivos de Senhas (CRÍTICO) ---
+.env
+
+# --- Pastas de Dados do Docker (Não subir para o GitHub) ---
+# Ignora a pasta onde o n8n salva os dados
+n8n_data/
+# Ignora a pasta onde o Redis salva a memória
+redis_data/
+# Ignora as sessões do WhatsApp (QR Code salvo, etc)
+waha_sessions/
+waha_media/
+
+# --- Arquivos de Sistema Operacional (Lixo) ---
+.DS_Store
+Thumbs.db
